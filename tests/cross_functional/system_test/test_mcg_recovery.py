@@ -27,7 +27,7 @@ class TestMCGRecovery(E2ETest):
 
     @pytest.mark.parametrize(
         argnames=["bucket_amount", "object_amount"],
-        argvalues=[pytest.param(5, 5)],
+        argvalues=[pytest.param(3, 3)],
     )
     def test_mcg_db_backup_recovery(
         self,

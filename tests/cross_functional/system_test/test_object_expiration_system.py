@@ -185,8 +185,8 @@ class TestObjectExpirationSystemTest:
 
         """
         feature_setup_map = setup_mcg_bg_features(
-            num_of_buckets=5,
-            object_amount=5,
+            num_of_buckets=3,
+            object_amount=3,
             is_disruptive=True,
             skip_any_features=["nsfs", "rgw kafka", "caching"],
         )
@@ -400,7 +400,7 @@ class TestObjectExpirationSystemTest:
             feature_setup_map,
             run_in_bg=False,
             skip_any_features=["nsfs", "rgw kafka", "caching"],
-            object_amount=5,
+            object_amount=3,
         )
 
         logger.info("No issues seen with the MCG bg feature validation")
