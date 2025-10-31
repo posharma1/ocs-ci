@@ -419,7 +419,8 @@ class TestGracefulNodesShutdown(E2ETest):
             "MCG NSFS,RGW kafka notification"
         )
         feature_setup_map = setup_mcg_bg_features(
-            skip_any_features=["caching", "nsfs", "rgw kafka"]
+            skip_any_features=["caching", "nsfs", "rgw kafka"],
+            skip_any_provider=["azure"],
         )
 
         # check OSD status after graceful node shutdown
