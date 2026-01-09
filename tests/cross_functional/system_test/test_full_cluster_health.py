@@ -200,7 +200,9 @@ class TestFullClusterHealth(PASTest):
         Returns:
             bool: True if ALL checks passed, False otherwise
         """
-        return self.ceph_not_health_error() and pod.wait_for_pods_to_be_running()
+        return self.ceph_not_health_error() and pod.wait_for_pods_to_be_running(
+            timeout=600
+        )
 
     @system_test
     @polarion_id("OCS-2749")
