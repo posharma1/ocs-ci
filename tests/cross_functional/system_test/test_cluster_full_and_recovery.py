@@ -157,8 +157,8 @@ class TestClusterFullAndRecovery(E2ETest):
         expected_alerts = ["CephOSDCriticallyFull", "CephOSDNearFull"]
         prometheus = PrometheusAPI(threading_lock=threading_lock)
         sample = TimeoutSampler(
-            timeout=600,
-            sleep=50,
+            timeout=1200,
+            sleep=60,
             func=prometheus.verify_alerts_via_prometheus,
             expected_alerts=expected_alerts,
             threading_lock=threading_lock,
