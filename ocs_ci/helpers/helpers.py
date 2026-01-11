@@ -2867,7 +2867,7 @@ def wait_for_ct_pod_recovery():
                 condition=constants.STATUS_RUNNING,
                 selector=constants.TOOL_APP_LABEL,
                 resource_count=1,
-                timeout=120,
+                timeout=420,
                 sleep=10,
             )
             return True

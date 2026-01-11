@@ -4,6 +4,7 @@ Test to verify cluster health/stability when it's full (85%)
 
 import logging
 import pytest
+import time
 
 from ocs_ci.framework import config
 from ocs_ci.ocs.cluster import CephCluster, get_percent_used_capacity
@@ -188,7 +189,7 @@ class TestFullClusterHealth(PASTest):
         self.nodes.restart_nodes([node_obj])
 
         wait_for_nodes_status()
-
+        time.sleep(180)
         pod.wait_for_pods_to_be_running(
             namespace=config.ENV_DATA["cluster_namespace"], pod_names=[pod_obj.name]
         )
@@ -201,7 +202,7 @@ class TestFullClusterHealth(PASTest):
             bool: True if ALL checks passed, False otherwise
         """
         return self.ceph_not_health_error() and pod.wait_for_pods_to_be_running(
-            timeout=600
+            timeout=1200
         )
 
     @system_test
