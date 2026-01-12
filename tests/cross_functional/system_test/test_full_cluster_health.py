@@ -246,14 +246,17 @@ class TestFullClusterHealth(PASTest):
 
         osd_node_reboot()
         logger.info("Checking health after OSD node reboot")
+        time.sleep(180)
         assert self.is_cluster_healthy(), "Cluster is not healthy"
 
         self.mgr_pod_node_restart()
         logger.info("Checking health after worker node shutdown")
+        time.sleep(180)
         assert self.is_cluster_healthy(), "Cluster is not healthy"
 
         self.restart_ocs_operator_node()
         logger.info("Checking health after OCS operator node restart")
+        time.sleep(180)
         assert self.is_cluster_healthy(), "Cluster is not healthy"
 
         self.delete_pods()
