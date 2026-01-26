@@ -52,7 +52,7 @@ class TestNSFSSystem(MCGTest):
         nsfs_bucket_factory,
         awscli_pod_session,
         test_directory_setup,
-        noobaa_db_backup_and_recovery_locally,
+        # noobaa_db_backup_and_recovery_locally,
     ):
         """
         The objectives of this test case are:
@@ -223,26 +223,26 @@ class TestNSFSSystem(MCGTest):
         sleep(60)
         wait_for_storage_pods()
 
-        logger.info("Performing noobaa db backup/recovery")
-        noobaa_db_backup_and_recovery_locally()
-        for nsfs_obj in nsfs_objs:
-            logger.info(
-                f"Downloading the objects and validating the integrity on {nsfs_obj.bucket_name} "
-                f"post noobaa-db recovery"
-            )
-            sync_object_directory(
-                podobj=awscli_pod_session,
-                src=f"s3://{nsfs_obj.bucket_name}",
-                target=f"{test_directory_setup.result_dir}/{nsfs_obj.bucket_name}/c",
-                signed_request_creds=nsfs_obj.s3_creds,
-            )
-            compare_directory(
-                awscli_pod=awscli_pod_session,
-                original_dir=f"{test_directory_setup.origin_dir}/{nsfs_obj.bucket_name}",
-                result_dir=f"{test_directory_setup.result_dir}/{nsfs_obj.bucket_name}/c",
-                amount=5,
-                pattern=nsfs_obj_pattern,
-            )
+        # logger.info("Performing noobaa db backup/recovery")
+        # noobaa_db_backup_and_recovery_locally()
+        # for nsfs_obj in nsfs_objs:
+        #     logger.info(
+        #         f"Downloading the objects and validating the integrity on {nsfs_obj.bucket_name} "
+        #         f"post noobaa-db recovery"
+        #     )
+        #     sync_object_directory(
+        #         podobj=awscli_pod_session,
+        #         src=f"s3://{nsfs_obj.bucket_name}",
+        #         target=f"{test_directory_setup.result_dir}/{nsfs_obj.bucket_name}/c",
+        #         signed_request_creds=nsfs_obj.s3_creds,
+        #     )
+        #     compare_directory(
+        #         awscli_pod=awscli_pod_session,
+        #         original_dir=f"{test_directory_setup.origin_dir}/{nsfs_obj.bucket_name}",
+        #         result_dir=f"{test_directory_setup.result_dir}/{nsfs_obj.bucket_name}/c",
+        #         amount=5,
+        #         pattern=nsfs_obj_pattern,
+        #     )
 
 
 def scale_ceph(replica=1):

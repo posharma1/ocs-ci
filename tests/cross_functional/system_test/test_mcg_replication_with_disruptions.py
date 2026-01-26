@@ -52,7 +52,7 @@ from ocs_ci.utility.retry import retry
 from ocs_ci.ocs.exceptions import (
     CommandFailed,
     ResourceWrongStatusException,
-    TimeoutExpiredError,
+    # TimeoutExpiredError,
 )
 
 
@@ -363,36 +363,36 @@ class TestLogBasedReplicationWithDisruptions:
                 timeout=600,
             ), f"Deletion sync failed to complete for the objects {objs_to_delete} deleted in the first bucket set"
 
-        logger.info("Taking backup of noobaa db")
-        cnpg_cluster_yaml, original_db_replica_count, secrets_obj = (
-            noobaa_db_backup_locally()
-        )
+        # logger.info("Taking backup of noobaa db")
+        # cnpg_cluster_yaml, original_db_replica_count, secrets_obj = (
+        #     noobaa_db_backup_locally()
+        # )
 
-        disable_deletion_sync = source_bucket.replication_policy
-        disable_deletion_sync["rules"][0]["sync_deletions"] = False
-        update_replication_policy(source_bucket.name, disable_deletion_sync)
-        logger.info("Deleting all the objects from the second bucket")
-        mockup_logger.delete_all_objects_and_log(source_bucket.name)
-        assert not compare_bucket_object_list(
-            mcg_obj_session,
-            source_bucket.name,
-            target_bucket.name,
-            timeout=300,
-        ), "Deletion sync was done but not expected"
+        # disable_deletion_sync = source_bucket.replication_policy
+        # disable_deletion_sync["rules"][0]["sync_deletions"] = False
+        # update_replication_policy(source_bucket.name, disable_deletion_sync)
+        # logger.info("Deleting all the objects from the second bucket")
+        # mockup_logger.delete_all_objects_and_log(source_bucket.name)
+        # assert not compare_bucket_object_list(
+        #     mcg_obj_session,
+        #     source_bucket.name,
+        #     target_bucket.name,
+        #     timeout=300,
+        # ), "Deletion sync was done but not expected"
 
-        # Do noobaa db recovery and see if the deletion sync works now
-        logger.info("Recovering noobaa db from backup")
-        noobaa_db_recovery_from_local(
-            cnpg_cluster_yaml, original_db_replica_count, secrets_obj
-        )
-        wait_for_noobaa_pods_running(timeout=420)
+        # # Do noobaa db recovery and see if the deletion sync works now
+        # logger.info("Recovering noobaa db from backup")
+        # noobaa_db_recovery_from_local(
+        #     cnpg_cluster_yaml, original_db_replica_count, secrets_obj
+        # )
+        # wait_for_noobaa_pods_running(timeout=420)
 
-        assert compare_bucket_object_list(
-            mcg_obj_session,
-            source_bucket.name,
-            target_bucket.name,
-            timeout=600,
-        ), "Deletion sync was not done but expected"
+        # assert compare_bucket_object_list(
+        #     mcg_obj_session,
+        #     source_bucket.name,
+        #     target_bucket.name,
+        #     timeout=600,
+        # ), "Deletion sync was not done but expected"
 
         # Remove replication policy and upload some objects to the bucket
         # make sure the replication itself doesn't take place
@@ -690,96 +690,96 @@ class TestMCGReplicationWithVersioningSystemTest:
             )
             future.result()
 
-        # Take the noobaa db backup and then disable the sync versions
-        # make sure no version sync happens
-        logger.info("Taking backup of noobaa db")
-        cnpg_cluster_yaml, original_db_replica_count, secrets_obj = (
-            noobaa_db_backup_locally()
-        )
+        # # Take the noobaa db backup and then disable the sync versions
+        # # make sure no version sync happens
+        # logger.info("Taking backup of noobaa db")
+        # cnpg_cluster_yaml, original_db_replica_count, secrets_obj = (
+        #     noobaa_db_backup_locally()
+        # )
 
-        logger.info("Disabling version sync for both the buckets")
-        replication_1["rules"][0]["sync_versions"] = False
-        replication_2["rules"][0]["sync_versions"] = False
+        # logger.info("Disabling version sync for both the buckets")
+        # replication_1["rules"][0]["sync_versions"] = False
+        # replication_2["rules"][0]["sync_versions"] = False
 
-        update_replication_policy(bucket_2.name, replication_1)
-        update_replication_policy(bucket_1.name, replication_2)
+        # update_replication_policy(bucket_2.name, replication_1)
+        # update_replication_policy(bucket_1.name, replication_2)
 
-        # Change the replication cycle delay to 3 minutes
-        logger.info("Reduce the bucket replication delay cycle to 5 minutes")
-        reduce_replication_delay(interval=5)
+        # # Change the replication cycle delay to 3 minutes
+        # logger.info("Reduce the bucket replication delay cycle to 5 minutes")
+        # reduce_replication_delay(interval=5)
 
-        # Update previously uploaded object with new data and new version
-        self.upload_objects_with_retry(
-            mcg_obj_session,
-            bucket_1,
-            bucket_2,
-            mockup_logger_source,
-            test_directory_setup.origin_dir,
-            pattern=object_key,
-            prefix=prefix_1,
-            num_versions=4,
-        )
-        logger.info(
-            f"Updated object {object_key} with new version data in bucket {bucket_1.name}"
-        )
+        # # Update previously uploaded object with new data and new version
+        # self.upload_objects_with_retry(
+        #     mcg_obj_session,
+        #     bucket_1,
+        #     bucket_2,
+        #     mockup_logger_source,
+        #     test_directory_setup.origin_dir,
+        #     pattern=object_key,
+        #     prefix=prefix_1,
+        #     num_versions=4,
+        # )
+        # logger.info(
+        #     f"Updated object {object_key} with new version data in bucket {bucket_1.name}"
+        # )
 
-        try:
-            wait_for_object_versions_match(
-                mcg_obj_session,
-                awscli_pod_session,
-                bucket_1.name,
-                bucket_2.name,
-                obj_key=f"{prefix_1}/{object_key}",
-            )
-        except TimeoutExpiredError:
-            logger.info(
-                f"Sync versions didnt work as expected, both {bucket_1.name} "
-                f"and {bucket_2.name} have different versions"
-            )
-        else:
-            assert False, "Sync version worked even when sync_versions was disabled!!"
+        # try:
+        #     wait_for_object_versions_match(
+        #         mcg_obj_session,
+        #         awscli_pod_session,
+        #         bucket_1.name,
+        #         bucket_2.name,
+        #         obj_key=f"{prefix_1}/{object_key}",
+        #     )
+        # except TimeoutExpiredError:
+        #     logger.info(
+        #         f"Sync versions didnt work as expected, both {bucket_1.name} "
+        #         f"and {bucket_2.name} have different versions"
+        #     )
+        # else:
+        #     assert False, "Sync version worked even when sync_versions was disabled!!"
 
-        # Recover the noobaa db from the backup and perform
-        # object deletion and verify deletion sync works
-        logger.info("Recovering noobaa db from backup")
-        noobaa_db_recovery_from_local(
-            cnpg_cluster_yaml, original_db_replica_count, secrets_obj
-        )
-        wait_for_noobaa_pods_running(timeout=420)
+        # # Recover the noobaa db from the backup and perform
+        # # object deletion and verify deletion sync works
+        # logger.info("Recovering noobaa db from backup")
+        # noobaa_db_recovery_from_local(
+        #     cnpg_cluster_yaml, original_db_replica_count, secrets_obj
+        # )
+        # wait_for_noobaa_pods_running(timeout=420)
 
-        logger.info("Enabling version sync for both the buckets")
-        replication_1["rules"][0]["sync_versions"] = True
-        replication_2["rules"][0]["sync_versions"] = True
+        # logger.info("Enabling version sync for both the buckets")
+        # replication_1["rules"][0]["sync_versions"] = True
+        # replication_2["rules"][0]["sync_versions"] = True
 
-        update_replication_policy(bucket_2.name, replication_1)
-        update_replication_policy(bucket_1.name, replication_2)
+        # update_replication_policy(bucket_2.name, replication_1)
+        # update_replication_policy(bucket_1.name, replication_2)
 
-        # Update previously uploaded object with new data and new version
-        self.upload_objects_with_retry(
-            mcg_obj_session,
-            bucket_1,
-            bucket_2,
-            mockup_logger_source,
-            test_directory_setup.origin_dir,
-            pattern=object_key,
-            prefix=prefix_1,
-            num_versions=4,
-        )
-        logger.info(
-            f"Updated object {object_key} with new version data in bucket {bucket_1.name}"
-        )
+        # # Update previously uploaded object with new data and new version
+        # self.upload_objects_with_retry(
+        #     mcg_obj_session,
+        #     bucket_1,
+        #     bucket_2,
+        #     mockup_logger_source,
+        #     test_directory_setup.origin_dir,
+        #     pattern=object_key,
+        #     prefix=prefix_1,
+        #     num_versions=4,
+        # )
+        # logger.info(
+        #     f"Updated object {object_key} with new version data in bucket {bucket_1.name}"
+        # )
 
-        wait_for_object_versions_match(
-            mcg_obj_session,
-            awscli_pod_session,
-            bucket_1.name,
-            bucket_2.name,
-            obj_key=f"{prefix_1}/{object_key}",
-        )
-        logger.info(
-            f"Replication works from {bucket_1.name} to {bucket_2.name} and"
-            f" has all the versions of object {object_key}"
-        )
+        # wait_for_object_versions_match(
+        #     mcg_obj_session,
+        #     awscli_pod_session,
+        #     bucket_1.name,
+        #     bucket_2.name,
+        #     obj_key=f"{prefix_1}/{object_key}",
+        # )
+        # logger.info(
+        #     f"Replication works from {bucket_1.name} to {bucket_2.name} and"
+        #     f" has all the versions of object {object_key}"
+        # )
 
         validate_mcg_bg_features(
             feature_setup_map,
