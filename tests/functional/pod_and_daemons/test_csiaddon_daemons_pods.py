@@ -314,25 +314,19 @@ class TestCSIADDonDaemonset(ManageTest):
         ), "CSI-addons pod didn't came up is running status "
 
     @pytest.mark.parametrize(
-        argnames=["pod_label", "plugin_dir", "socket_name"],
+        argnames=["storage_system"],
         argvalues=[
             pytest.param(
-                constants.CSI_RBD_ADDON_NODEPLUGIN_LABEL_420,
-                constants.RBD_CSI_ADDONS_PLUGIN_DIR,
-                constants.RBD_CSI_ADDONS_SOCKET_NAME,
+                "rbd",
                 marks=[tier1, green_squad, pytest.mark.polarion_id("OCS-7379")],
             ),
             pytest.param(
-                constants.CSI_CEPHFS_ADDON_NODEPLUGIN_LABEL_420,
-                constants.CEPHFS_CSI_ADDONS_PLUGIN_DIR,
-                constants.CEPHFS_CSI_ADDONS_SOCKET_NAME,
+                "cephfs",
                 marks=[tier1, green_squad, pytest.mark.polarion_id("OCS-7507")],
             ),
         ],
     )
-    def test_csi_addons_socket_creation_per_pods_node(
-        self, pod_label, plugin_dir, socket_name
-    ):
+    def test_csi_addons_socket_creation_per_pods_node(self, storage_system):
         """
         csi-addons.sock are used for communication for csi-addons.
         This test ensure the socket creation of csi-addons.sock socket
@@ -344,6 +338,24 @@ class TestCSIADDonDaemonset(ManageTest):
         OCS-7507 is part verification of DFBUGS_5082 automation
 
         """
+        storage_configs = {
+            "rbd": {
+                "pod_label": constants.CSI_RBD_ADDON_NODEPLUGIN_LABEL_420,
+                "plugin_dir": constants.RBD_CSI_ADDONS_PLUGIN_DIR,
+                "socket_name": constants.RBD_CSI_ADDONS_SOCKET_NAME,
+            },
+            "cephfs": {
+                "pod_label": constants.CSI_CEPHFS_ADDON_NODEPLUGIN_LABEL_420,
+                "plugin_dir": constants.CEPHFS_CSI_ADDONS_PLUGIN_DIR,
+                "socket_name": constants.CEPHFS_CSI_ADDONS_SOCKET_NAME,
+            },
+        }
+
+        config_data = storage_configs[storage_system]
+        pod_label = config_data["pod_label"]
+        plugin_dir = config_data["plugin_dir"]
+        socket_name = config_data["socket_name"]
+
         logger.info(
             "Validating csi-addons socket creation on nodes of each csi-addons pod"
         )
