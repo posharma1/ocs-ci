@@ -3609,7 +3609,7 @@ METAIO = os.path.join(TEMPLATE_WORKLOAD_DIR, "helper_scripts/meta_data_io.py")
 FILE_CREATOR_IO = os.path.join(
     TEMPLATE_WORKLOAD_DIR, "helper_scripts/file_creator_io.py"
 )
-EXTENTDED_ATTRIBUTES = os.path.join(
+EXTENDED_ATTRIBUTES = os.path.join(
     TEMPLATE_WORKLOAD_DIR, "helper_scripts/check_xattr.py"
 )
 
