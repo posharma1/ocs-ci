@@ -1600,6 +1600,13 @@ ALERT_MDSCACHEUSAGEHIGH = "MDSCacheUsageHigh"
 ALERT_MDSCPUUSAGEHIGH = "MDSCPUUsageHigh"
 ALERT_MDSXATTR = "CephXattrSetLatency"
 ALERT_ODFOPERATORNOTUPGRADABLE = "ODFOperatorNotUpgradeable"
+# ODF 4.21 new alerts
+ALERT_ODF_CORE_POD_RESTART = "ODFCorePodRestarted"
+ALERT_ODF_DISK_UTILIZATION_HIGH = "ODFDiskUtilizationHigh"
+ALERT_ODF_NODE_LATENCY_HIGH_OSD_NODES = "ODFNodeLatencyHighOnOSDNodes"
+ALERT_ODF_NODE_LATENCY_HIGH_NON_OSD_NODES = "ODFNodeLatencyHighOnNonOSDNodes"
+ALERT_ODF_NODE_NIC_BANDWIDTH_SATURATION = "ODFNodeNICBandwidthSaturation"
+ALERT_ODF_NODE_MTU_LESS_THAN_9000 = "ODFNodeMTULessThan9000"
 
 # OCS Deployment related constants
 OPERATOR_NODE_LABEL = "cluster.ocs.openshift.io/openshift-storage=''"
@@ -1774,6 +1781,7 @@ ROSA_HCP_PLATFORM = "rosa_hcp"
 ROSA_PLATFORMS = [ROSA_PLATFORM, ROSA_HCP_PLATFORM]
 HCI_BAREMETAL = "hci_baremetal"
 HCI_VSPHERE = "hci_vsphere"
+HCP_AWS = "hcp_aws"
 ACM_OCP_DEPLOYMENT = "acm_ocp_deployment"
 ON_PREM_PLATFORMS = [
     VSPHERE_PLATFORM,
@@ -1819,10 +1827,7 @@ DEPLOYMENT_TYPES = [IPI_DEPL_TYPE, UPI_DEPL_TYPE, MANAGED_DEPL_TYPE, LOCAL_DEPL_
 
 DEFAULT_AWS_REGION = "us-east-2"
 
-HCI_PROVIDER_CLIENT_PLATFORMS = [
-    HCI_BAREMETAL,
-    HCI_VSPHERE,
-]
+HCI_PROVIDER_CLIENT_PLATFORMS = [HCI_BAREMETAL, HCI_VSPHERE]
 
 IBM_REGIONS = ["us-east", "us-south", "us"]
 IBM_CLOUD_SUBNETS = {
@@ -2704,6 +2709,12 @@ AWS_CLOUDFORMATION_TAG = "aws:cloudformation:stack-name"
 # aws prefixes
 ACCOUNT_ROLE_PREFIX_ROSA_HCP = "accroleshcp"
 OPERATOR_ROLE_PREFIX_ROSA_HCP = "oproleshcp"
+
+# aws hcp constants
+HCP_DEPLOYER_POLICY = os.path.join(
+    TEMPLATE_DIR, "ocs-deployment", "provider-mode", "aws-hcp", "iam_role_policy.json"
+)
+
 
 # aws volume constants
 AWS_VOL_PVC_NAME_TAG = "kubernetes.io/created-for/pvc/name"
@@ -3742,8 +3753,6 @@ MCLOCK_BALANCED = "balanced"
 MCLOCK_HIGH_RECOVERY_OPS = "high_recovery_ops"
 
 # chaos Tests constants
-KRKN_REPO_URL = "https://github.com/redhat-chaos/krkn.git"
-KRKN_VERSION = "v4.0.16"
 KRKN_DIR = os.path.join(DATA_DIR, "krkn")
 KRKN_CHAOS_DIR = os.path.join(TOP_DIR, "ocs_ci", "krkn_chaos")
 KRKN_SCENARIO_TEMPLATE_DIR = os.path.join(KRKN_CHAOS_DIR, "template")
@@ -3810,3 +3819,16 @@ MON_STATUS_DOWN = "down"
 
 # ODF 4.21 health overview resources
 BLACKBOX_POD_LABEL = "app.kubernetes.io/name=odf-blackbox-exporter"
+
+# ODF 4.21 health overview mock alerts dir
+HEALTHALERTS_DIR = os.path.join(TEMPLATE_DIR, "health_overview_alerts")
+
+# CSI PORTS
+CEPH_NODE_PORT = 31659
+
+# Ceph network ports
+CEPH_MON_MSGR2_PORT = 3300  # Ceph Monitor (msgr2 protocol)
+CEPH_MON_LEGACY_PORT = 6789  # Ceph Monitor (legacy protocol)
+CEPH_EXPORTER_PORT = 9283  # Ceph Exporter (metrics)
+CEPH_OSD_PORT_MIN = 6800  # Ceph OSD port range start
+CEPH_OSD_PORT_MAX = 7300  # Ceph OSD port range end

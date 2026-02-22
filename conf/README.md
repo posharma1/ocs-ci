@@ -321,6 +321,10 @@ higher priority).
 * `performance_profile` - performance profile to be used (balanced, lean, performance).
 * `noobaa_external_pgsql` - Set to True if external PgSQL server for noobaa should be used.
   See AUTH and pgsql section there for additional data you need to provide via config.
+* `noobaa_db_backup_enabled` - Used to enable automatic noobaa DB backup feature.
+* `noobaa_db_backup_schedule` - Used to set backup schedule; valid values: daily, weekly, monthly
+* `noobaa_db_backup_max_snapshots` - Maximum number of backup snapshots to retain
+* `noobaa_db_backup_snapshot_class` - Volume snapshot class to use for backups
 * `baremetal` - sub-section related to Bare Metal platform
     * `env_name` - name of the Bare Metal environment (used mainly for identification of configuration specific for the particular environment, e.g. _dnsmasq_ or _iPXE_ configuration)
     * `bm_httpd_server` - hostname or IP of helper/provisioning node (publicly accessible)
@@ -426,6 +430,11 @@ higher priority).
 * `auto_repair` - similar to clusters.<cluster name>.auto_repair but applied to the Agent hosted cluster
 * * `ntp_server` - NTP server to use in compute nodes in case of mon skew detected in ceph health during deployment
 * `sno` - explicitly mark single node cluster
+* `iscsi_target_ip` - The IP of iscsi server
+* `iscsi_target_username`- The username for authenticating with the iSCSI target.
+* `iscsi_target_password`- The password for the iSCSI target authentication.
+* `iscsi_target_iqn`- The iSCSI Qualified Name (IQN) identifying the iSCSI target.
+* `iscsi_setup` - Configure iscsi or not (Default: false). Necessory for FDF backed by SAN storage.
 
 #### UPGRADE
 

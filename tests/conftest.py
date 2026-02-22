@@ -243,6 +243,7 @@ from ocs_ci.helpers.performance_lib import run_oc_command
 from ocs_ci.utility.utils import exec_cmd
 from ocs_ci.ocs.resources.packagemanifest import PackageManifest
 from ocs_ci.helpers.helpers import run_cmd_verify_cli_output
+from ocs_ci.utility.iscsi_config import iscsi_teardown
 
 DEPLOYERS = {}
 
@@ -2214,6 +2215,11 @@ def cluster(
                     log.error(
                         f"Either failed to delete bucket or bucket doesn't exist {ex}"
                     )
+            if ocsci_config.ENV_DATA.get("iscsi_setup", False):
+                try:
+                    iscsi_teardown()
+                except Exception as ex:
+                    log.error(f"Failed to teardown iSCSI: {ex}")
             deployer.destroy_cluster(log_cli_level)
 
         request.addfinalizer(cluster_teardown_finalizer)
@@ -7498,7 +7504,9 @@ def create_workload_factory():
                 workload_pod_count=workload_details["pod_count"],
                 workload_pvc_count=workload_details["pvc_count"],
                 pvc_interface=pvc_interface,
-                workload_path=workload_details["workload_path"],
+                workload_path=workload_details.get(
+                    "workload_path", workload_details["workload_dir"]
+                ),
             )
             instances.append(workload)
             total_pvc_count += workload_details["pvc_count"]
@@ -7519,7 +7527,9 @@ def create_workload_factory():
                 workload_pvc_selector=workload_details["dr_workload_app_pvc_selector"],
                 appset_model=appset_model,
                 pvc_interface=pvc_interface,
-                workload_path=workload_details["workload_path"],
+                workload_path=workload_details.get(
+                    "workload_path", workload_details["workload_dir"]
+                ),
             )
             instances.append(workload)
             total_pvc_count += workload_details["pvc_count"]
