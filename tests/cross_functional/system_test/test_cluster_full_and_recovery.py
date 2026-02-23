@@ -154,7 +154,7 @@ class TestClusterFullAndRecovery(E2ETest):
             "Verify Alerts are seen 'CephClusterCriticallyFull' and 'CephOSDNearFull'"
         )
         log.info("Verify used capacity bigger than 85%")
-        expected_alerts = ["CephOSDCriticallyFull"]
+        expected_alerts = ["CephOSDNearFull"]
         prometheus = PrometheusAPI(threading_lock=threading_lock)
         sample = TimeoutSampler(
             timeout=600,
