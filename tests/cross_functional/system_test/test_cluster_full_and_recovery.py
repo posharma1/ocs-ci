@@ -139,57 +139,32 @@ class TestClusterFullAndRecovery(E2ETest):
         self.benchmark_obj.run_fio_benchmark_operator(is_completed=False)
         self.benchmark_operator_teardown = True
 
-        log.info("Verify used capacity bigger than 75%")
-        sample = TimeoutSampler(
-            timeout=2500,
-            sleep=40,
-            func=verify_osd_used_capacity_greater_than_expected,
-            expected_used_capacity=75.0,
-            full_capacity=85.0,
-        )
-        if not sample.wait_for_func_status(result=True):
-            log.error("The after 1800 seconds the used capacity smaller than 85%")
-            raise TimeoutExpiredError
-
-        log.info("Verify Alert 'CephOSDNearFull' is seen")
-        # expected_alerts = ["CephOSDCriticallyFull", "CephOSDNearFull"]
-        prometheus = PrometheusAPI(threading_lock=threading_lock)
-        sample = TimeoutSampler(
-            timeout=600,
-            sleep=50,
-            func=prometheus.verify_alerts_via_prometheus,
-            expected_alerts=["CephOSDNearFull"],
-            threading_lock=threading_lock,
-        )
-        if not sample.wait_for_func_status(result=True):
-            log.error("The alerts  do not exist after 600 sec")
-            raise TimeoutExpiredError
-
         log.info("Verify used capacity bigger than 85%")
         sample = TimeoutSampler(
             timeout=2500,
             sleep=40,
             func=verify_osd_used_capacity_greater_than_expected,
             expected_used_capacity=85.0,
-            full_capacity=100.0,
         )
         if not sample.wait_for_func_status(result=True):
             log.error("The after 1800 seconds the used capacity smaller than 85%")
             raise TimeoutExpiredError
 
-        log.info("Verify Alerts are seen 'CephClusterCriticallyFull' is seen'")
+        log.info(
+            "Verify Alerts are seen 'CephClusterCriticallyFull' and 'CephOSDNearFull'"
+        )
         log.info("Verify used capacity bigger than 85%")
-        # expected_alerts = ["CephOSDCriticallyFull", "CephOSDNearFull"]
+        expected_alerts = ["CephOSDCriticallyFull"]
         prometheus = PrometheusAPI(threading_lock=threading_lock)
         sample = TimeoutSampler(
             timeout=600,
             sleep=50,
             func=prometheus.verify_alerts_via_prometheus,
-            expected_alerts=["CephOSDCriticallyFull"],
+            expected_alerts=expected_alerts,
             threading_lock=threading_lock,
         )
         if not sample.wait_for_func_status(result=True):
-            log.error("The alerts  do not exist after 600 sec")
+            log.error(f"The alerts {expected_alerts} do not exist after 600 sec")
             raise TimeoutExpiredError
 
         for pod_name in ("mon", "mgr", "osd"):

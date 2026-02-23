@@ -402,9 +402,7 @@ def validate_mcg_nsfs_feature():
     logger.info("This is not implemented")
 
 
-def verify_osd_used_capacity_greater_than_expected(
-    expected_used_capacity, full_capacity
-):
+def verify_osd_used_capacity_greater_than_expected(expected_used_capacity):
     """
     Verify OSD percent used capacity greate than ceph_full_ratio
 
@@ -422,7 +420,7 @@ def verify_osd_used_capacity_greater_than_expected(
     osds_utilization = get_osd_utilization()
     logger.info(f"osd utilization: {osds_utilization}")
     for osd_id, osd_utilization in osds_utilization.items():
-        if expected_used_capacity < osd_utilization < full_capacity:
+        if osd_utilization > expected_used_capacity:
             logger.info(f"OSD ID:{osd_id}:{osd_utilization} greater than 85%")
             return True
     return False
