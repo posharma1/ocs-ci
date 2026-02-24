@@ -449,7 +449,13 @@ def pytest_collection_modifyitems(session, config, items):
                 squad = marker.name.split("_")[0]
                 item.user_properties.append(("squad", squad.capitalize()))
 
-    if not (teardown or deploy or (deploy and skip_ocs_deployment)):
+    # Skip version checks during collect-only to avoid cluster connections
+    if not (
+        teardown
+        or deploy
+        or (deploy and skip_ocs_deployment)
+        or config.option.collectonly
+    ):
         for item in items[:]:
             skipif_ocp_version_marker = item.get_closest_marker("skipif_ocp_version")
             skipif_ocs_version_marker = item.get_closest_marker("skipif_ocs_version")
