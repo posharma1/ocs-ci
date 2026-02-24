@@ -32,33 +32,46 @@ class TestCSIADDonDaemonset(ManageTest):
     """
 
     @pytest.mark.parametrize(
-        argnames=["daemonset_name", "pod_label"],
+        argnames=["storage_type"],
         argvalues=[
             pytest.param(
-                constants.DAEMONSET_CSI_RBD_CSI_ADDONS,
-                constants.CSI_RBD_ADDON_NODEPLUGIN_LABEL_420,
+                "rbd",
                 marks=[tier1, green_squad, pytest.mark.polarion_id("OCS-7386")],
             ),
             pytest.param(
-                constants.DAEMONSET_CSI_CEPHFS_CSI_ADDONS,
-                constants.CSI_CEPHFS_ADDON_NODEPLUGIN_LABEL_420,
+                "cephfs",
                 marks=[tier1, green_squad, pytest.mark.polarion_id("OCS-7501")],
             ),
         ],
     )
-    def test_csi_addon_daemonset_exists(self, daemonset_name, pod_label):
+    def test_csi_addon_daemonset_exists(self, storage_type):
         """
         Verify that the CSI addon daemonset exists and is properly configured
 
         Args:
-            daemonset_name (str): Name of the CSI addon daemonset to verify
-            pod_label (str): Expected pod label for the daemonset
+            storage_type (str): Type of storage system (rbd or cephfs)
 
         steps:
         1. Check if CSI addon Daemonset exists
         2. Verify daemonset configuration
 
         """
+        # Configuration mapping for different storage types
+        storage_configs = {
+            "rbd": {
+                "daemonset_name": constants.DAEMONSET_CSI_RBD_CSI_ADDONS,
+                "pod_label": constants.CSI_RBD_ADDON_NODEPLUGIN_LABEL_420,
+            },
+            "cephfs": {
+                "daemonset_name": constants.DAEMONSET_CSI_CEPHFS_CSI_ADDONS,
+                "pod_label": constants.CSI_CEPHFS_ADDON_NODEPLUGIN_LABEL_420,
+            },
+        }
+
+        config_data = storage_configs[storage_type]
+        daemonset_name = config_data["daemonset_name"]
+        pod_label = config_data["pod_label"]
+
         daemonsets = DaemonSet(namespace=config.ENV_DATA["cluster_namespace"])
         logger.info("Validating existence of CSI Addon daemonset")
 
