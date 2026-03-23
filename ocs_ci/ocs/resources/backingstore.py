@@ -165,6 +165,22 @@ class BackingStore:
                 func=cmdMap[self.method],
             )
             if not sample.wait_for_func_status(result=True):
+                # Get backingstore details before raising error
+                log.error(
+                    f"Failed to delete backingstore {self.name} after {timeout} seconds"
+                )
+                try:
+                    log.info(f"Getting describe output for backingstore {self.name}")
+                    bs_describe = OCP(
+                        kind=constants.BACKINGSTORE,
+                        namespace=config.ENV_DATA["cluster_namespace"],
+                    ).describe(resource_name=self.name)
+                    log.error(
+                        f"Backingstore {self.name} describe output:\n{bs_describe}"
+                    )
+                except Exception as e:
+                    log.warning(f"Could not get describe output for {self.name}: {e}")
+
                 err_msg = f"Failed to delete {self.name}"
                 log.error(err_msg)
                 raise TimeoutExpiredError(err_msg)
