@@ -22,6 +22,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     skipif_aws_creds_are_missing,
     skipif_disconnected_cluster,
 )
+from tests.cross_functional.conftest import cleanup_mcg_resources
 from ocs_ci.ocs.node import get_worker_nodes, get_node_objs
 from ocs_ci.ocs.bucket_utils import (
     compare_bucket_object_list,
@@ -75,6 +76,18 @@ class TestMCGReplicationWithDisruptions(E2ETest):
     3) To verify that the Data restore functionality works
     4) To verify that the Certain admin/disruptive operations do not impact the replication
     """
+
+    @pytest.fixture(autouse=True)
+    def teardown(self, request, mcg_obj_session):
+        """
+        Teardown to cleanup MCG resources after test
+        """
+
+        def finalizer():
+            logger.info("Running MCG resource cleanup...")
+            cleanup_mcg_resources(mcg_obj_session)
+
+        request.addfinalizer(finalizer)
 
     @pytest.mark.parametrize(
         argnames=["source_bucketclass", "target_bucketclass"],
@@ -272,6 +285,19 @@ class TestMCGReplicationWithDisruptions(E2ETest):
 @magenta_squad
 @skipif_vsphere_ipi
 class TestLogBasedReplicationWithDisruptions:
+
+    @pytest.fixture(autouse=True)
+    def teardown(self, request, mcg_obj_session):
+        """
+        Teardown to cleanup MCG resources after test
+        """
+
+        def finalizer():
+            logger.info("Running MCG resource cleanup...")
+            cleanup_mcg_resources(mcg_obj_session)
+
+        request.addfinalizer(finalizer)
+
     @retry(Exception, tries=10, delay=5)
     def delete_objs_in_batch(self, objs_to_delete, mockup_logger, source_bucket):
         """
@@ -421,6 +447,18 @@ class TestLogBasedReplicationWithDisruptions:
 @skipif_aws_creds_are_missing
 @skipif_disconnected_cluster
 class TestMCGReplicationWithVersioningSystemTest:
+
+    @pytest.fixture(autouse=True)
+    def teardown_fixture(self, request, mcg_obj_session):
+        """
+        Teardown to cleanup MCG resources after test
+        """
+
+        def finalizer():
+            logger.info("Running MCG resource cleanup...")
+            cleanup_mcg_resources(mcg_obj_session)
+
+        request.addfinalizer(finalizer)
 
     @retry(CommandFailed, tries=7, delay=30)
     def upload_objects_with_retry(

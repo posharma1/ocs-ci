@@ -10,6 +10,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     magenta_squad,
 )
 from ocs_ci.framework.testlib import E2ETest
+from tests.cross_functional.conftest import cleanup_mcg_resources
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,18 @@ class TestMCGRecovery(E2ETest):
     Test MCG system recovery
 
     """
+
+    @pytest.fixture(autouse=True)
+    def teardown(self, request, mcg_obj_session):
+        """
+        Teardown to cleanup MCG resources after test
+        """
+
+        def finalizer():
+            log.info("Running MCG resource cleanup...")
+            cleanup_mcg_resources(mcg_obj_session)
+
+        request.addfinalizer(finalizer)
 
     @pytest.mark.parametrize(
         argnames=["bucket_amount", "object_amount"],

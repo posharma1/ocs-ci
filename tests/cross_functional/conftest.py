@@ -70,6 +70,136 @@ from ocs_ci.helpers.vdbench_helpers import create_temp_config_file
 logger = logging.getLogger(__name__)
 
 
+def cleanup_mcg_resources(mcg_obj, test_namespace=None):
+    """
+    Cleanup MCG resources in the correct order to avoid deletion failures.
+
+    This function fetches all MCG resources created in the test namespace
+    and deletes them in the correct dependency order:
+    1. Buckets (OBC)
+    2. BucketClasses
+    3. NamespaceStores
+    4. BackingStores
+
+    Args:
+        mcg_obj: MCG object instance
+        test_namespace: Namespace to clean up (defaults to cluster namespace)
+
+    """
+    from ocs_ci.utility.retry import retry
+
+    namespace = test_namespace or config.ENV_DATA["cluster_namespace"]
+    logger.info(f"Starting MCG resource cleanup in namespace: {namespace}")
+
+    # Step 1: Delete all buckets (OBCs)
+    logger.info("Step 1: Deleting all ObjectBucketClaims...")
+    try:
+        obc_obj = OCP(kind="ObjectBucketClaim", namespace=namespace)
+        obcs = obc_obj.get().get("items", [])
+        for obc in obcs:
+            obc_name = obc["metadata"]["name"]
+            try:
+                logger.info(f"Deleting OBC: {obc_name}")
+                # Delete all objects in the bucket first
+                try:
+                    bucket_name = obc["spec"].get("bucketName")
+                    if bucket_name:
+                        logger.info(f"Deleting objects in bucket: {bucket_name}")
+                        mcg_obj.s3_resource.Bucket(bucket_name).objects.all().delete()
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to delete objects in bucket {bucket_name}: {e}"
+                    )
+
+                # Delete the OBC with retry
+                @retry(Exception, tries=5, delay=60)
+                def delete_obc():
+                    obc_obj.delete(resource_name=obc_name)
+
+                delete_obc()
+                logger.info(f"Successfully deleted OBC: {obc_name}")
+            except Exception as e:
+                logger.error(f"Failed to delete OBC {obc_name}: {e}")
+    except Exception as e:
+        logger.error(f"Error during OBC cleanup: {e}")
+
+    # Step 2: Delete all BucketClasses
+    logger.info("Step 2: Deleting all BucketClasses...")
+    try:
+        bc_obj = OCP(kind="BucketClass", namespace=namespace)
+        bucketclasses = bc_obj.get().get("items", [])
+        for bc in bucketclasses:
+            bc_name = bc["metadata"]["name"]
+            # Skip default bucketclass
+            if bc_name in [
+                "noobaa-default-bucket-class",
+                "openshift-storage.noobaa.io",
+            ]:
+                logger.info(f"Skipping default bucketclass: {bc_name}")
+                continue
+            try:
+                logger.info(f"Deleting BucketClass: {bc_name}")
+
+                @retry(Exception, tries=5, delay=60)
+                def delete_bc():
+                    bc_obj.delete(resource_name=bc_name)
+
+                delete_bc()
+                logger.info(f"Successfully deleted BucketClass: {bc_name}")
+            except Exception as e:
+                logger.error(f"Failed to delete BucketClass {bc_name}: {e}")
+    except Exception as e:
+        logger.error(f"Error during BucketClass cleanup: {e}")
+
+    # Step 3: Delete all NamespaceStores
+    logger.info("Step 3: Deleting all NamespaceStores...")
+    try:
+        ns_obj = OCP(kind="NamespaceStore", namespace=namespace)
+        namespacestores = ns_obj.get().get("items", [])
+        for ns in namespacestores:
+            ns_name = ns["metadata"]["name"]
+            try:
+                logger.info(f"Deleting NamespaceStore: {ns_name}")
+
+                @retry(Exception, tries=5, delay=60)
+                def delete_ns():
+                    ns_obj.delete(resource_name=ns_name)
+
+                delete_ns()
+                logger.info(f"Successfully deleted NamespaceStore: {ns_name}")
+            except Exception as e:
+                logger.error(f"Failed to delete NamespaceStore {ns_name}: {e}")
+    except Exception as e:
+        logger.error(f"Error during NamespaceStore cleanup: {e}")
+
+    # Step 4: Delete all BackingStores
+    logger.info("Step 4: Deleting all BackingStores...")
+    try:
+        bs_obj = OCP(kind="BackingStore", namespace=namespace)
+        backingstores = bs_obj.get().get("items", [])
+        for bs in backingstores:
+            bs_name = bs["metadata"]["name"]
+            # Skip default backingstore
+            if bs_name == "noobaa-default-backing-store":
+                logger.info(f"Skipping default backingstore: {bs_name}")
+                continue
+            try:
+                logger.info(f"Deleting BackingStore: {bs_name}")
+
+                @retry(Exception, tries=5, delay=60)
+                def delete_bs():
+                    bs_obj.delete(resource_name=bs_name)
+
+                delete_bs()
+                logger.info(f"Successfully deleted BackingStore: {bs_name}")
+            except Exception as e:
+                logger.error(f"Failed to delete BackingStore {bs_name}: {e}")
+    except Exception as e:
+        logger.error(f"Error during BackingStore cleanup: {e}")
+
+    logger.info("MCG resource cleanup completed")
+
+
 def restore_mcg_reconcilation(ocs_storagecluster_obj):
     params = '{"spec": {"multiCloudGateway": {"reconcileStrategy": "manage"}}}'
     ocs_storagecluster_obj.patch(
