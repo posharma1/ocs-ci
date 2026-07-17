@@ -3611,6 +3611,203 @@ data_foundation_overview = {
         By.XPATH,
     ),
 }
+
+# VirtualMachine Page Locators
+VM_LOCATORS = {
+    # Navigation — Virtualization section button in left nav (expand/collapse)
+    "virtualization_menu": (
+        "//button[text()='Virtualization']",
+        By.XPATH,
+    ),
+    # VirtualMachines link inside expanded Virtualization section
+    "virtualmachines_tab": (
+        "VirtualMachines",
+        By.LINK_TEXT,
+    ),
+    # Left nav — Workloads section button (expand/collapse)
+    "workloads_menu": (
+        "//button[text()='Workloads']",
+        By.XPATH,
+    ),
+    "workloads_pods_option": (
+        "Pods",
+        By.LINK_TEXT,
+    ),
+    # Top project selector
+    "project_selector_dropdown": (
+        "//button[contains(@class,'co-namespace-dropdown__menu-toggle')]",
+        By.XPATH,
+    ),
+    "project_show_default_toggle": (
+        "//input[@type='checkbox'][@id[contains(.,'showDefault')]] | "
+        "//input[@type='radio'][@id[contains(.,'showDefault')]] | "
+        "//label[normalize-space(.)='Show default projects']",
+        By.XPATH,
+    ),
+    "project_search_input": (
+        "//input[@data-test='dropdown-text-filter' or "
+        "@placeholder='Select project...' or @placeholder='Filter by name...' or "
+        "@aria-label='Filter project and label']",
+        By.XPATH,
+    ),
+    # Project namespace item in the dropdown — format with namespace name at runtime
+    "project_namespace_item_tmpl": (
+        "//a[normalize-space(.)='{namespace}'] | "
+        "//button[normalize-space(.)='{namespace}'] | "
+        "//li[normalize-space(.)='{namespace}']//a | "
+        "//li[normalize-space(.)='{namespace}']//button"
+    ),
+    # Namespace entry in the left-side tree — format with namespace name at runtime
+    "namespace_left_tree_item_tmpl": "//li[contains(.,'{namespace}')]",
+    # Welcome / overlay modal close button
+    "modal_close_button": (
+        "//button[@data-test='modal-close-action'] | "
+        "//button[@aria-label='Close'][ancestor::*[@role='dialog']]",
+        By.XPATH,
+    ),
+    # Creation wizard — top-right Create button
+    "create_vm_button": (
+        "//button[@data-test-id='item-create' or "
+        "@data-test-id='list-page-create-button' or "
+        "normalize-space(.)='Create']",
+        By.XPATH,
+    ),
+    # VM name input
+    "vm_name_input": (
+        "//input[@id='name' or @name='name' or @placeholder[contains(.,'Enter a name')]]",
+        By.XPATH,
+    ),
+    # Next button shared across all wizard pages
+    "creation_wizard_next": (
+        "//button[normalize-space(.)='Next']",
+        By.XPATH,
+    ),
+    # Guest OS page — Other Linux card (3rd card, matched by title text)
+    "guest_os_other_linux": (
+        "//*[contains(@class,'title') and normalize-space(.)='Other Linux'] | "
+        "//*[@role='radio' and contains(.,'Other Linux')] | "
+        "//article[contains(.,'Other Linux')]",
+        By.XPATH,
+    ),
+    # Guest OS type dropdown — button with placeholder text
+    "guest_os_type_dropdown": (
+        "//button[contains(normalize-space(.),'Select guest operating system type') or "
+        "contains(normalize-space(.),'guest operating system type')]",
+        By.XPATH,
+    ),
+    # Second option in Guest OS type dropdown
+    "guest_os_type_second_option": (
+        "(//ul[@role='menu' or @role='listbox' or contains(@class,'menu__list')]"
+        "//li[not(@role='separator') and not(@aria-disabled='true')])[2]",
+        By.XPATH,
+    ),
+    # Compute resources — size dropdown toggle (matched by wrapper class, not PF version)
+    "compute_size_dropdown": (
+        "//div[contains(@class,'instance-type-series-menu-card__size-dropdown')]"
+        "//button[@aria-haspopup='menu' or contains(@class,'menu-toggle')]",
+        By.XPATH,
+    ),
+    # small: 1 CPUs, 2 GiB Memory option
+    "compute_size_small_option": (
+        "//button[contains(normalize-space(.),'small') and "
+        "contains(normalize-space(.),'1 CPUs') and contains(normalize-space(.),'2 GiB')]",
+        By.XPATH,
+    ),
+    # Boot source — centos-stream10 volume row
+    "boot_volume_centos_stream10": (
+        "//td[normalize-space(.)='centos-stream10'] | "
+        "//span[normalize-space(.)='centos-stream10'] | "
+        "//tr[contains(.,'centos-stream10')]",
+        By.XPATH,
+    ),
+    # Customization — Storage tab (matched by text, not class)
+    "customization_storage_tab": (
+        "//button[normalize-space(.)='Storage' and ancestor::*[contains(@class,'tabs')]] | "
+        "//a[normalize-space(.)='Storage' and ancestor::*[contains(@class,'tabs')]]",
+        By.XPATH,
+    ),
+    # rootdisk row three-dots kebab button
+    "rootdisk_kebab_button": (
+        "//tr[contains(.,'rootdisk')]//button[@aria-label='Actions' or "
+        "@aria-label='Kebab toggle' or contains(@class,'menu-toggle')]",
+        By.XPATH,
+    ),
+    # Edit option from rootdisk kebab menu
+    "rootdisk_kebab_edit": (
+        "//li//button[normalize-space(.)='Edit']",
+        By.XPATH,
+    ),
+    # StorageClass dropdown in Edit disk popup (matched by label proximity)
+    "edit_disk_storageclass_dropdown": (
+        "//*[@role='dialog']//*[normalize-space(.)='StorageClass']"
+        "/following::button[@aria-haspopup='menu' or contains(@class,'menu-toggle')][1]",
+        By.XPATH,
+    ),
+    # StorageClass option ending with -vm
+    "edit_disk_storageclass_vm_option": (
+        "//li[@data-test-id[substring(normalize-space(.),string-length(normalize-space(.))-2)='-vm']] | "
+        "//span[@data-test-id[substring(normalize-space(.),string-length(normalize-space(.))-2)='-vm']] | "
+        "//span[contains(@class,'co-resource-item__resource-name')]"
+        "[substring(normalize-space(.),string-length(normalize-space(.))-2)='-vm']",
+        By.XPATH,
+    ),
+    # Save button in Edit disk popup
+    "edit_disk_save_button": (
+        "//*[@role='dialog']//button[normalize-space(.)='Save']",
+        By.XPATH,
+    ),
+    # Create VirtualMachine submit on Review and create page
+    "create_vm_submit_button": (
+        "//button[normalize-space(.)='Create VirtualMachine']",
+        By.XPATH,
+    ),
+    # VM status field in overview description list
+    "vm_status_running": (
+        "//dd[@data-test-id='virtual-machine-overview-details-status']"
+        "//*[normalize-space(.)='Running']",
+        By.XPATH,
+    ),
+    "vm_status_stopped": (
+        "//dd[@data-test-id='virtual-machine-overview-details-status']"
+        "//*[normalize-space(.)='Stopped']",
+        By.XPATH,
+    ),
+    # Actions menu button on VM detail page
+    "actions_button": (
+        "//button[normalize-space(.)='Actions']",
+        By.XPATH,
+    ),
+    # Actions > Control submenu
+    "actions_control_menu": (
+        "//li//button[normalize-space(.)='Control'] | "
+        "//button[normalize-space(.)='Control']",
+        By.XPATH,
+    ),
+    # Stop option inside Actions menu
+    "actions_stop_option": (
+        "//li//button[normalize-space(.)='Stop'] | "
+        "//button[normalize-space(.)='Stop']",
+        By.XPATH,
+    ),
+    # Delete option inside Actions menu
+    "actions_delete_option": (
+        "//li//button[normalize-space(.)='Delete'] | "
+        "//button[normalize-space(.)='Delete']",
+        By.XPATH,
+    ),
+    # Delete confirmation modal — Delete button
+    "delete_confirm_button": (
+        "//*[@role='dialog']//button[normalize-space(.)='Delete']",
+        By.XPATH,
+    ),
+    # Delete modal — 'With grace period' checkbox
+    "delete_grace_period_checkbox": (
+        "//input[@type='checkbox'][following-sibling::*[contains(.,'grace period')] or "
+        "following-sibling::text()[contains(.,'grace period')]] | "
+        "//label[contains(normalize-space(.),'With grace period')]/..//input[@type='checkbox']",
+        By.XPATH,
+    ),
+}
 external_systems = {
     "connect_external_system": (
         "//button[@data-test='configure-external-systems']",
