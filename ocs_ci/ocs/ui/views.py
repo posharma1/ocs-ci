@@ -3648,9 +3648,7 @@ virtualmachine = {
     ),
     # Project namespace item in the dropdown — format with namespace name at runtime
     "project_namespace_item_tmpl": (
-        "//li[@data-test='{namespace}']//a | //a[@data-test-id='{namespace}'] | "
-        "//a[.//span[normalize-space(.)='{namespace}']] | "
-        "//button[.//span[normalize-space(.)='{namespace}']]",
+        "//button[normalize-space(.)='{namespace}']",
         By.XPATH,
     ),
     # Namespace entry in the left-side tree — format with namespace name at runtime

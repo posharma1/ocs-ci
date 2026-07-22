@@ -416,6 +416,5 @@ class VirtualMachineUI(PageNavigator):
                     return True
             except (NoSuchElementException, WebDriverException):
                 return True
-            time.sleep(5)
         logger.warning(f"Namespace '{namespace}' still visible after {timeout}s")
         return False
