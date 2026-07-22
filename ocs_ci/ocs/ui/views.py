@@ -4059,7 +4059,6 @@ locators = {
         "external_systems": external_systems,
         "data_foundation_overview": data_foundation_overview,
         "attach_storage": attach_storage,
-        "virtualmachine": virtualmachine,
     },
     "4.20": {
         "login": {**login, **login_4_11, **login_4_14, **login_4_19},
@@ -4125,7 +4124,6 @@ locators = {
         "bucket_tab": bucket_tab,
         "data_foundation_overview": data_foundation_overview,
         "external_systems": external_systems,
-        "virtualmachine": virtualmachine,
     },
     "4.19": {
         "login": {**login, **login_4_11, **login_4_14, **login_4_19},
@@ -4185,7 +4183,6 @@ locators = {
         "mcg_stores": mcg_stores,
         "alerting": alerting,
         "bucket_tab": bucket_tab,
-        "virtualmachine": virtualmachine,
     },
     "4.18": {
         "login": {**login, **login_4_11, **login_4_14},
