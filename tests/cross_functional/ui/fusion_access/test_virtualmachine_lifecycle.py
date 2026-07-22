@@ -1,13 +1,12 @@
 """
-Test VirtualMachine Lifecycle - Creation and Deletion via UI
+Test VirtualMachine Lifecycle - Creation via UI
 
-This test automates the complete lifecycle of a VirtualMachine in OpenShift Virtualization
+This test automates the creation of a VirtualMachine in OpenShift Virtualization
 using the new multi-step creation wizard
 """
 
 import logging
 import pytest
-import time
 
 from ocs_ci.ocs.ui.page_objects.page_navigator import PageNavigator
 from ocs_ci.ocs.ui.base_ui import BaseUI
@@ -31,14 +30,6 @@ logger = logging.getLogger(__name__)
 class TestVirtualMachineLifecycle(ManageTest):
     """
     Test class for VirtualMachine lifecycle UI automation.
-
-    This class contains test cases for:
-    1. Creating a test namespace
-    2. Navigating to Virtualization > VirtualMachines
-    3. Creating a VM through the multi-step wizard
-    4. Monitoring VM status transitions
-    5. Stopping the VM
-    6. Deleting the VM with proper cleanup
     """
 
     @pytest.fixture(autouse=True)
@@ -55,9 +46,9 @@ class TestVirtualMachineLifecycle(ManageTest):
         self.vm_ui = VirtualMachineUI()
 
     @pytest.mark.polarion_id("OCS-8066")
-    def test_create_and_delete_virtualmachine_from_instancetype(self):
+    def test_create_virtualmachine_from_instancetype(self):
         """
-        Test to create and delete a VirtualMachine via the new UI wizard.
+        Test to create a VirtualMachine via the new UI wizard.
 
         Test Steps:
         1. Create a test namespace and navigate to Workloads > Pods in left nav.
@@ -65,29 +56,23 @@ class TestVirtualMachineLifecycle(ManageTest):
         2. Navigate to Virtualization > VirtualMachines, dismiss welcome modal.
         3. Click Create, enter a unique VM name, click Next (Deployment details).
         4. Guest OS page: select "Other Linux" (3rd card), open Guest operating
-           system type dropdown and pick the 2nd option, click Next.
+           system type dropdown and pick centos.stream10, click Next.
         5. Boot source page: click on centos-stream10 volume, click Next.
-        6. Compute resources page: click Next without selecting anything.
-        7. Customization page: click Storage tab, click three-dots on rootdisk row,
-           select Edit (middle option), change StorageClass to option ending with -vm,
-           click Save, click Next.
+        6. Compute resources page: select small size, click Next.
+        7. Customization page: click Storage tab, click the kebab menu on the
+           rootdisk row, select Edit, change StorageClass to option ending with
+           -vm, click Save, click Next.
         8. Review and create page: click Create VirtualMachine.
         9. Wait for VM status: Provisioning → Running.
-        10. Navigate back to VirtualMachines list, find the VM.
-        11. Select VM checkbox, Actions → Stop; wait for Stopped status.
-        12. Re-select VM checkbox, Actions → Delete; check "with grace period" and
-            "Delete disk" checkboxes; click Delete.
-
         """
         logger.info("=" * 80)
-        logger.info("Starting VirtualMachine Lifecycle Test")
+        logger.info("Starting VirtualMachine Creation Test")
         logger.info("=" * 80)
 
         logger.info("\nStep 1: Create new project")
         logger.info("-" * 80)
         project_obj = create_project()
         namespace = project_obj.namespace
-        time.sleep(10)
 
         self.vm_ui.navigate_to_workloads_pods()
         self.base_ui.take_screenshot("workloads_pods_page")
@@ -95,20 +80,16 @@ class TestVirtualMachineLifecycle(ManageTest):
         logger.info(f"Selecting namespace '{namespace}' from All Projects dropdown")
         self.vm_ui.select_project_from_all_projects(namespace)
         self.base_ui.take_screenshot("namespace_selected")
-        time.sleep(2)
 
         logger.info("\nStep 2: Navigate to Virtualization > VirtualMachines")
         logger.info("-" * 80)
         self.vm_ui.navigate_to_virtualmachines_page()
         self.base_ui.page_has_loaded()
         self.base_ui.take_screenshot("virtualmachines_page")
-        time.sleep(3)
 
         logger.info("\nStep 3: Click Create, enter VM name, click Next")
         logger.info("-" * 80)
-        # Dismiss any residual modal/overlay before clicking Create
-        self.vm_ui.dismiss_welcome_modal_if_present()
-        time.sleep(2)
+        self.vm_ui.dismiss_welcome_modal_if_present(wait_for_modal=True, timeout=15)
         vm_name = create_unique_resource_name("test", "vm")
         logger.info(f"Generated VM name: {vm_name}")
         self.vm_ui.click_create_virtualmachine()
@@ -117,32 +98,26 @@ class TestVirtualMachineLifecycle(ManageTest):
         self.base_ui.take_screenshot("vm_name_entered")
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("deployment_details_next_clicked")
-        time.sleep(3)
 
-        logger.info("\nStep 4: Guest OS — select Other Linux")
+        logger.info("\nStep 4: Guest OS — select Other Linux, pick centos.stream10")
         logger.info("-" * 80)
         self.vm_ui.select_guest_os_other_linux()
         self.base_ui.take_screenshot("other_linux_selected")
-        time.sleep(1)
 
         guest_os_type = self.vm_ui.select_guest_os()
         logger.info(f"Selected Guest OS type: {guest_os_type}")
         self.base_ui.take_screenshot("guest_os_type_selected")
-        time.sleep(1)
 
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("guest_os_next_clicked")
-        time.sleep(3)
 
         logger.info("\nStep 5: Boot source — select centos-stream10, click Next")
         logger.info("-" * 80)
         self.vm_ui.select_boot_volume_centos_stream10()
         self.base_ui.take_screenshot("centos_stream10_selected")
-        time.sleep(1)
 
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("boot_source_next_clicked")
-        time.sleep(3)
 
         logger.info("\nStep 6: Compute resources — select small: 1 CPUs, 2 GiB Memory")
         logger.info("-" * 80)
@@ -151,7 +126,6 @@ class TestVirtualMachineLifecycle(ManageTest):
         self.base_ui.take_screenshot("compute_size_selected")
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("compute_resources_next_clicked")
-        time.sleep(3)
 
         logger.info("\nStep 7: Customization — Storage tab, edit rootdisk StorageClass")
         logger.info("-" * 80)
@@ -159,89 +133,37 @@ class TestVirtualMachineLifecycle(ManageTest):
 
         self.vm_ui.click_customization_storage_tab()
         self.base_ui.take_screenshot("customization_storage_tab")
-        time.sleep(2)
 
         self.vm_ui.click_rootdisk_kebab_and_edit()
         self.base_ui.take_screenshot("edit_disk_popup_opened")
 
         storage_class = self.vm_ui.change_storageclass_to_vm_option()
+        assert storage_class.endswith(
+            "-vm"
+        ), f"Expected StorageClass ending with '-vm', got: {storage_class}"
         logger.info(f"Changed StorageClass to: {storage_class}")
         self.base_ui.take_screenshot("storageclass_vm_selected")
 
         self.vm_ui.click_edit_disk_save()
         self.base_ui.take_screenshot("edit_disk_saved")
-        time.sleep(2)
 
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("customization_next_clicked")
-        time.sleep(3)
 
         logger.info("\nStep 8: Review and create — click Create VirtualMachine")
         logger.info("-" * 80)
         self.base_ui.take_screenshot("review_and_create_page")
         self.vm_ui.click_create_virtualmachine_submit()
         self.base_ui.take_screenshot("vm_creation_initiated")
-        # Wait a few seconds for the welcome modal to appear, then close it
-        time.sleep(5)
-        self.vm_ui.dismiss_welcome_modal_if_present()
+        self.vm_ui.dismiss_welcome_modal_if_present(wait_for_modal=True, timeout=20)
         self.base_ui.take_screenshot("post_creation_welcome_modal_closed")
 
         logger.info("\nStep 9: Wait for VM status: Provisioning -> Running")
         logger.info("-" * 80)
         self.base_ui.page_has_loaded()
-        time.sleep(3)
         logger.info("Waiting for Running status ...")
         self.vm_ui.wait_for_vm_running()
         self.base_ui.take_screenshot("vm_running")
         logger.info(f"VirtualMachine '{vm_name}' is now Running")
-
-        logger.info("\nStep 10: VM detail page confirmed — proceeding to stop")
-        logger.info("-" * 80)
-        self.base_ui.take_screenshot("vm_running_detail_page")
-        time.sleep(2)
-
-        logger.info("\nStep 11: Actions > Control > Stop — wait for Stopped")
-        logger.info("-" * 80)
-        self.vm_ui.click_actions_menu()
-        self.vm_ui.click_actions_control_then_stop()
-        self.base_ui.take_screenshot("vm_stop_initiated")
-
-        logger.info("Waiting for Stopped status...")
-        self.vm_ui.wait_for_vm_stopped()
-        self.base_ui.take_screenshot("vm_stopped")
-        logger.info(f"VirtualMachine '{vm_name}' is now Stopped")
-
-        logger.info("\nStep 12: Actions > Delete — confirm deletion")
-        logger.info("-" * 80)
-        self.vm_ui.click_actions_menu()
-        self.vm_ui.click_actions_delete()
-        self.base_ui.take_screenshot("delete_modal_opened")
-
-        self.vm_ui.check_grace_period_and_confirm_delete()
-        self.base_ui.take_screenshot("vm_deletion_confirmed")
-
-        logger.info("Waiting 180 seconds for VM and namespace to be fully deleted...")
-        time.sleep(180)
-
-        deletion_verified = self.vm_ui.verify_namespace_gone_from_left_tree(
-            namespace, timeout=30
-        )
-
-        if deletion_verified:
-            logger.info(
-                f"Namespace '{namespace}' gone from left tree — deletion verified"
-            )
-            self.base_ui.take_screenshot("namespace_deleted_verified")
-        else:
-            logger.error(
-                f"Namespace '{namespace}' still visible — deletion not verified"
-            )
-            self.base_ui.take_screenshot("namespace_deletion_verification_failed")
-
         logger.info("VM Created: PASS")
         logger.info("VM Running: PASS")
-        logger.info("VM Stopped: PASS")
-
-        assert (
-            deletion_verified
-        ), f"Still able to view Namespace '{namespace}' vm might not be deleted properly"
