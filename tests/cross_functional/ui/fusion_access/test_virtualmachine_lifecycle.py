@@ -56,8 +56,8 @@ class TestVirtualMachineLifecycle(ManageTest):
         2. Navigate to Virtualization > VirtualMachines, dismiss welcome modal.
         3. Click Create, enter a unique VM name, click Next (Deployment details).
         4. Guest OS page: select "Other Linux" (3rd card), open Guest operating
-           system type dropdown and pick centos.stream10, click Next.
-        5. Boot source page: click on centos-stream10 volume, click Next.
+           system type dropdown and pick the latest centos.stream* version, click Next.
+        5. Boot source page: click on the latest centos-stream* volume, click Next.
         6. Compute resources page: select small size, click Next.
         7. Customization page: click Storage tab, click the kebab menu on the
            rootdisk row, select Edit, change StorageClass to option ending with
@@ -99,7 +99,9 @@ class TestVirtualMachineLifecycle(ManageTest):
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("deployment_details_next_clicked")
 
-        logger.info("\nStep 4: Guest OS — select Other Linux, pick centos.stream10")
+        logger.info(
+            "\nStep 4: Guest OS — select Other Linux, pick latest centos.stream"
+        )
         logger.info("-" * 80)
         self.vm_ui.select_guest_os_other_linux()
         self.base_ui.take_screenshot("other_linux_selected")
@@ -111,10 +113,10 @@ class TestVirtualMachineLifecycle(ManageTest):
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("guest_os_next_clicked")
 
-        logger.info("\nStep 5: Boot source — select centos-stream10, click Next")
+        logger.info("\nStep 5: Boot source — select latest centos-stream, click Next")
         logger.info("-" * 80)
-        self.vm_ui.select_boot_volume_centos_stream10()
-        self.base_ui.take_screenshot("centos_stream10_selected")
+        self.vm_ui.select_boot_volume_centos_stream_latest()
+        self.base_ui.take_screenshot("centos_stream_latest_selected")
 
         self.vm_ui.click_next_button()
         self.base_ui.take_screenshot("boot_source_next_clicked")

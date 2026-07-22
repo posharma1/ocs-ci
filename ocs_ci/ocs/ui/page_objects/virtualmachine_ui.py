@@ -51,8 +51,13 @@ class VirtualMachineUI(PageNavigator):
         try:
             toggle_locator = self.vm_loc["project_show_default_toggle"]
             wait_for_element_to_be_clickable(locator=toggle_locator, timeout=10)
-            self.do_click(toggle_locator)
-            logger.info("Clicked 'Show default projects' toggle")
+            if not self.get_checkbox_status(locator=toggle_locator, timeout=10):
+                self.do_click(toggle_locator)
+                logger.info("Enabled 'Show default projects' toggle")
+            else:
+                logger.info(
+                    "'Show default projects' toggle is already enabled, skipping click"
+                )
         except (NoSuchElementException, WebDriverException, TimeoutException):
             pass
 
@@ -192,20 +197,35 @@ class VirtualMachineUI(PageNavigator):
 
     def select_guest_os(self):
         """
-        Open the 'Guest operating system type' dropdown and select centos.stream10.
+        Open the 'Guest operating system type' dropdown, collect all
+        centos.stream* options and select the one with the highest version number.
 
         Returns:
-            str: Text of the selected option
+            str: Text of the selected option (e.g. 'centos.stream11')
         """
         dropdown = self.vm_loc["guest_os_type_dropdown"]
         wait_for_element_to_be_clickable(locator=dropdown, timeout=30)
         self.do_click(dropdown)
 
-        option = self.vm_loc["guest_os_type_centos_stream10"]
-        wait_for_element_to_be_clickable(locator=option, timeout=20)
-        self.do_click(option)
-        logger.info("Selected Guest OS type: centos.stream10")
-        return "centos.stream10"
+        options_locator = self.vm_loc["guest_os_type_centos_stream_options"]
+        wait_for_element_to_be_clickable(locator=options_locator, timeout=20)
+        elements = self.get_elements(options_locator)
+        if not elements:
+            raise RuntimeError(
+                "No centos.stream* options found in Guest OS type dropdown"
+            )
+
+        def _version(el):
+            text = el.text.strip()
+            # text is e.g. 'centos.stream10'; extract the trailing integer
+            suffix = text.replace("centos.stream", "")
+            return int(suffix) if suffix.isdigit() else 0
+
+        latest = max(elements, key=_version)
+        selected_text = latest.text.strip()
+        latest.click()
+        logger.info(f"Selected Guest OS type: {selected_text} (latest centos.stream)")
+        return selected_text
 
     def select_compute_size_small(self):
         """
@@ -221,14 +241,29 @@ class VirtualMachineUI(PageNavigator):
         self.do_click(small_locator)
         logger.info("Selected compute size: small: 1 CPUs, 2 GiB Memory")
 
-    def select_boot_volume_centos_stream10(self):
+    def select_boot_volume_centos_stream_latest(self):
         """
-        On the Boot source page click on the 'centos-stream10' volume row.
+        On the Boot source page click on the centos-stream volume row with the
+        highest version number (e.g. centos-stream11 is preferred over centos-stream10).
         """
-        volume_locator = self.vm_loc["boot_volume_centos_stream10"]
-        wait_for_element_to_be_clickable(locator=volume_locator, timeout=30)
-        self.do_click(volume_locator)
-        logger.info("Clicked centos-stream10 boot volume")
+        options_locator = self.vm_loc["boot_volume_centos_stream_options"]
+        wait_for_element_to_be_clickable(locator=options_locator, timeout=30)
+        elements = self.get_elements(options_locator)
+        if not elements:
+            raise RuntimeError(
+                "No centos-stream* boot volume rows found on Boot source page"
+            )
+
+        def _version(el):
+            text = el.text.strip()
+            # text is e.g. 'centos-stream10'; extract the trailing integer
+            suffix = text.replace("centos-stream", "")
+            return int(suffix) if suffix.isdigit() else 0
+
+        latest = max(elements, key=_version)
+        selected_text = latest.text.strip()
+        latest.click()
+        logger.info(f"Clicked boot volume: {selected_text} (latest centos-stream)")
 
     def click_customization_storage_tab(self):
         """
@@ -310,22 +345,31 @@ class VirtualMachineUI(PageNavigator):
     def wait_for_vm_running(self):
         """
         Wait up to 15 minutes for the Status field to show 'Running'.
+        Each attempt probes for up to 5 s; the retry loop provides the
+        remaining wait budget (30 tries × 30 s delay = 15 minutes).
         """
         logger.info("Checking for Running status on VM detail page...")
         wait_for_element_to_be_visible(
-            locator=self.vm_loc["vm_status_running"], timeout=30
+            locator=self.vm_loc["vm_status_running"], timeout=5
         )
         logger.info("VM status is now: Running")
         return True
 
-    @retry((AssertionError, TimeoutExpiredError), tries=20, delay=10, backoff=1)
+    @retry(
+        (AssertionError, TimeoutExpiredError, TimeoutException),
+        tries=20,
+        delay=10,
+        backoff=1,
+    )
     def wait_for_vm_stopped(self):
         """
         Wait for the Status field to show 'Stopped'.
+        Each attempt probes for up to 5 s; the retry loop provides the
+        remaining wait budget (20 tries × 10 s delay = ~3.5 minutes).
         """
         logger.info("Checking for Stopped status on VM detail page...")
         wait_for_element_to_be_visible(
-            locator=self.vm_loc["vm_status_stopped"], timeout=10
+            locator=self.vm_loc["vm_status_stopped"], timeout=5
         )
         logger.info("VM status is now: Stopped")
         return True

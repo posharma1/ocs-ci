@@ -3686,10 +3686,10 @@ virtualmachine = {
         "//div[contains(@class,'preference-select-menu')]//button[@aria-expanded]",
         By.XPATH,
     ),
-    # centos.stream10 option — button with role="option" inside the floating menu
-    "guest_os_type_centos_stream10": (
+    # All centos.stream* options — button with role="option" inside the floating menu
+    "guest_os_type_centos_stream_options": (
         "//button[@role='option'][.//span[@class='pf-v6-c-menu__item-text']"
-        "[normalize-space(.)='centos.stream10']]",
+        "[starts-with(normalize-space(.), 'centos.stream')]]",
         By.XPATH,
     ),
     # Compute resources — size dropdown toggle
@@ -3703,9 +3703,9 @@ virtualmachine = {
         "[.//span[normalize-space(.)='small: 1 CPUs, 2 GiB Memory']]",
         By.XPATH,
     ),
-    # Boot source — centos-stream10 volume row
-    "boot_volume_centos_stream10": (
-        "//td[normalize-space(.)='centos-stream10']",
+    # Boot source — all centos-stream* volume rows
+    "boot_volume_centos_stream_options": (
+        "//td[starts-with(normalize-space(.), 'centos-stream')]",
         By.XPATH,
     ),
     # Customization — Storage tab
