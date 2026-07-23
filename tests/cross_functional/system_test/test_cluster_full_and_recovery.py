@@ -79,7 +79,6 @@ class TestClusterFullAndRecovery(E2ETest):
         teardown_project_factory(self.project_obj)
 
         logger.test_step("Create RBD PVC, run IO and calculate checksum")
-        logger.info("Creating CEPH-RBD PVC with 2GB size")
         pvc_obj_rbd1 = pvc_factory(
             interface=constants.CEPHBLOCKPOOL,
             project=self.project_obj,
@@ -107,7 +106,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("RBD PVC created, IO completed, and checksum calculated")
 
         logger.test_step("Create CephFS PVC, run IO and calculate checksum")
-        logger.info("Creating CEPH-FS PVC with 2GB size")
         pvc_obj_fs1 = pvc_factory(
             interface=constants.CEPHFILESYSTEM,
             project=self.project_obj,
@@ -135,7 +133,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("CephFS PVC created, IO completed, and checksum calculated")
 
         logger.test_step("Fill cluster to 85% using benchmark operator")
-        logger.info("Starting benchmark operator to fill cluster to full ratio")
         size = get_file_size(100)
         self.benchmark_obj = BenchmarkOperatorFIO()
         self.benchmark_obj.setup_benchmark_fio(total_size=size)
@@ -143,7 +140,6 @@ class TestClusterFullAndRecovery(E2ETest):
         self.benchmark_operator_teardown = True
 
         logger.test_step("Verify cluster capacity reaches 85%")
-        logger.info("Verifying used capacity is greater than 85%")
         sample = TimeoutSampler(
             timeout=2500,
             sleep=40,
@@ -158,9 +154,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("Cluster capacity successfully reached 85%")
 
         logger.test_step("Verify cluster full alerts are triggered")
-        logger.info(
-            "Checking for 'CephClusterCriticallyFull' and 'CephOSDNearFull' alerts"
-        )
         expected_alerts = ["CephOSDCriticallyFull", "CephOSDNearFull"]
         prometheus = PrometheusAPI(threading_lock=threading_lock)
         sample = TimeoutSampler(
@@ -188,7 +181,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("All storage pods are running")
 
         logger.test_step("Create PVC2 and verify they remain in Pending state")
-        logger.info("Creating PVC2 [CEPH-FS + CEPH-RBD] and expecting Pending state")
         pvc_obj_rbd2 = pvc_factory(
             interface=constants.CEPHBLOCKPOOL,
             project=self.project_obj,
@@ -200,9 +192,6 @@ class TestClusterFullAndRecovery(E2ETest):
             project=self.project_obj,
             size=2,
             status=constants.STATUS_PENDING,
-        )
-        logger.info(
-            "Waiting 20 sec to verify PVC2 [CEPH-FS + CEPH-RBD] are in Pending state."
         )
         time.sleep(20)
         helpers.wait_for_resource_state(
@@ -233,7 +222,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("Snapshots verified in false readyToUse state")
 
         logger.test_step("Increase Ceph full ratio from 85% to 95%")
-        logger.info("Changing Ceph full_ratio from 85% to 95%")
         logger.info(
             "Based on doc we need to change the ceph_full_ratio to 88%, but we run "
             "many fio pods therefore, it may not be enough to increase by only 3%"
@@ -248,7 +236,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("Benchmark operator PVCs deleted successfully")
 
         logger.test_step("Verify PVC2 [CEPH-FS + CEPH-RBD] move to Bound state")
-        logger.info("Waiting for PVC2 to reach Bound state")
         helpers.wait_for_resource_state(
             resource=pvc_obj_rbd2, state=constants.STATUS_BOUND, timeout=600
         )
@@ -258,7 +245,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("PVC2 [CEPH-FS + CEPH-RBD] successfully moved to Bound state")
 
         logger.test_step("Verify snapshots move from false to true readyToUse state")
-        logger.info("Checking snapshot readyToUse status")
         snap_fs1_obj.ocp.wait_for_resource(
             condition="true",
             resource_name=snap_rbd1_obj.name,
@@ -274,7 +260,6 @@ class TestClusterFullAndRecovery(E2ETest):
         logger.info("Snapshots successfully moved to true readyToUse state")
 
         logger.test_step("Restore PVCs from snapshots and verify data integrity")
-        logger.info(f"Creating RBD PVC from snapshot {snap_rbd1_obj.name}")
         restore_pvc_rbd1_obj = snapshot_restore_factory(
             snapshot_obj=snap_rbd1_obj,
             size="2Gi",

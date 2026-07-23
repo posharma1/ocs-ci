@@ -104,7 +104,6 @@ class TestObjectExpirationSystemTest:
             )
 
         PROP_SLEEP_TIME = 10
-        logger.info(f"Waiting {PROP_SLEEP_TIME} seconds for policy to propagate")
         sleep(PROP_SLEEP_TIME)
 
         logger.info(f"Verifying object expiration configuration on bucket: {bucket}")
@@ -223,10 +222,8 @@ class TestObjectExpirationSystemTest:
         number_of_buckets = 50
 
         logger.test_step(
-            f"Create {number_of_buckets} buckets with no-prefix expiry rule"
+            f"Create first set of {number_of_buckets} buckets with no-prefix expiry rule"
         )
-        logger.info(f"Creating first set of {number_of_buckets} buckets")
-
         buckets_without_prefix = self.create_obcs_apply_expire_rule(
             number_of_buckets=number_of_buckets,
             cloud_providers=cloud_providers,
@@ -240,9 +237,8 @@ class TestObjectExpirationSystemTest:
         )
 
         logger.test_step(
-            f"Create {number_of_buckets} buckets with prefix 'others' expiry rule"
+            f"Create second set of {number_of_buckets} buckets with prefix 'others' expiry rule"
         )
-        logger.info(f"Creating second set of {number_of_buckets} buckets")
         expire_rule_prefix["Rules"][0]["Filter"]["Prefix"] = "others"
         buckets_with_prefix = self.create_obcs_apply_expire_rule(
             number_of_buckets=number_of_buckets,

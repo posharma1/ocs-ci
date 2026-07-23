@@ -148,7 +148,6 @@ class TestMCGReplicationWithDisruptions(E2ETest):
         logger.info("Uni-directional bucket replication verified successfully")
 
         logger.test_step("Change from uni-directional to bi-directional replication")
-        logger.info("Updating replication policy to bi-directional")
         prefix_site_2 = "site2"
         patch_replication_policy_to_bucket(
             target_bucket_name,
@@ -160,9 +159,6 @@ class TestMCGReplicationWithDisruptions(E2ETest):
 
         logger.test_step(
             "Write objects to target bucket and verify bi-directional replication"
-        )
-        logger.info(
-            "Writing objects to target bucket to test bi-directional replication"
         )
         written_random_objects = write_random_test_objects_to_bucket(
             awscli_pod_session,
@@ -182,7 +178,6 @@ class TestMCGReplicationWithDisruptions(E2ETest):
         logger.test_step(
             "Delete all objects from target bucket and verify recovery on write"
         )
-        logger.info("Deleting all objects from target bucket to test data recovery")
         try:
             mcg_obj_session.s3_resource.Bucket(
                 target_bucket_name

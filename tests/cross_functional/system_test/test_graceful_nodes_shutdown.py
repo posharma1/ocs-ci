@@ -438,8 +438,7 @@ class TestGracefulNodesShutdown(E2ETest):
         nodes.stop_nodes(nodes=master_nodes, force=False)
         logger.info("All nodes stopped gracefully")
 
-        logger.test_step("Wait 5 minutes before starting nodes")
-        logger.info("Waiting 5 minutes for stabilization")
+        logger.test_step("Wait 5 minutes for stabilization before starting nodes")
         time.sleep(300)
 
         logger.test_step("Start all worker and master nodes")

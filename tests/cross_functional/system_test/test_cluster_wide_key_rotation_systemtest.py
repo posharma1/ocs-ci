@@ -80,7 +80,6 @@ class TestKeyRotationWithClusterFull(E2ETest):
 
         """
         logger.test_step("Setup MCG background features for entry criteria")
-        logger.info("Starting MCG setup entry criteria")
         # MCG entry criteria
         setup_mcg_bg_features(
             num_of_buckets=10,
@@ -92,7 +91,6 @@ class TestKeyRotationWithClusterFull(E2ETest):
         logger.info("MCG setup completed successfully")
 
         logger.test_step("Setup CephFS PVCs for entry criteria")
-        logger.info("Starting CephFS setup entry criteria")
         # Cephfs entry criteria
         pvc_obj, pod_obj = multi_pvc_pod_lifecycle_factory(
             measure=False, delete=False, num_of_pvcs=30
@@ -105,27 +103,26 @@ class TestKeyRotationWithClusterFull(E2ETest):
 
         logger.info("CephFS setup completed successfully")
 
-        logger.test_step("Configure cluster-wide key rotation schedule")
+        logger.test_step(
+            "Configure cluster-wide key rotation schedule to every 5 minutes"
+        )
         time_interval_to_rotate_key_in_minutes = str(5)
         tries = 10
         delays = int(time_interval_to_rotate_key_in_minutes) * 60 / tries
         schedule = f"*/{time_interval_to_rotate_key_in_minutes} * * * *"
-        logger.info("Setting key rotation schedule to every 5 minutes")
         key_rotation = KeyRotation()
         if not key_rotation.is_keyrotation_enable():
             key_rotation.enable_keyrotation()
         OSDKeyrotation().set_keyrotation_schedule(schedule)
         logger.info("Key rotation schedule set successfully")
 
-        logger.test_step("Verify key rotation schedule and key generation")
-        logger.info("Verifying key rotation schedule is configured correctly")
+        logger.test_step("Verify key rotation schedule and new key generation")
         self.verify_key_rotation_time(schedule=schedule)
         logger.info("Verifying new key is generated after scheduled rotation")
         verify_new_key_after_rotation(tries, delays)
         logger.info("Key rotation verified successfully")
 
-        logger.test_step("Fill cluster to 85% capacity and verify key rotation")
-        logger.info("Starting FIO to fill cluster to full ratio")
+        logger.test_step("Fill cluster to 85% capacity via FIO and verify key rotation")
         run_fio_till_cluster_full()
         logger.info("Cluster filled to 85% capacity")
         logger.info("Verifying key rotation schedule unchanged after cluster full")
@@ -135,7 +132,6 @@ class TestKeyRotationWithClusterFull(E2ETest):
         logger.info("Key rotation verified successfully after cluster full")
 
         logger.test_step("Perform OSD resize and verify key rotation")
-        logger.info("Starting OSD resize operation")
         basic_resize_osd(get_storage_size())
         logger.info("OSD resize completed successfully")
 
@@ -146,8 +142,6 @@ class TestKeyRotationWithClusterFull(E2ETest):
         logger.info("Key rotation verified successfully after OSD resize")
 
         logger.test_step("Perform NooBaa rebuild and verify key rotation")
-        logger.info("Starting NooBaa rebuild process")
-
         validate_noobaa_rebuild_system(bucket_factory_session, mcg_obj_session)
         logger.info("NooBaa rebuild completed successfully")
         logger.info("Verifying key rotation schedule unchanged after NooBaa rebuild")
@@ -157,7 +151,6 @@ class TestKeyRotationWithClusterFull(E2ETest):
         logger.info("Key rotation verified successfully after NooBaa rebuild")
 
         logger.test_step("Perform NooBaa DB backup/recovery and verify key rotation")
-        logger.info("Starting NooBaa DB backup and recovery process")
         # Refresh MCG credentials after NooBaa rebuild; credentials may have
         # been recreated, so the session/function-scoped mcg objects would
         # otherwise still hold stale keys and CreateBucket would fail with

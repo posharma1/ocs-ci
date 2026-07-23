@@ -148,10 +148,10 @@ class TestCloneDeletion(E2ETest):
         """
 
         logger.test_step(
-            f"Create {self.num_of_clones} clones on {interface_type} PVC to fill cluster"
+            f"Create {self.num_of_clones} clones of {self.pvc_size} GB "
+            f"on {interface_type} PVC to fill cluster"
         )
         self.timeout = 1800
-        logger.info(f"Creating {self.num_of_clones} clones of {self.pvc_size} GB PVC")
 
         # Create the initial set of clones
         self.create_clones(self.num_of_clones, pvc_clone_factory)
@@ -164,9 +164,6 @@ class TestCloneDeletion(E2ETest):
         logger.test_step("Verify cluster full alerts are triggered")
         # Verify if expected alerts are seen; if not, continue creating extra clones
         while attempt < max_attempts:
-            logger.info(
-                "Checking for 'CephClusterCriticallyFull' and 'CephOSDNearFull' alerts"
-            )
             expected_alerts = ["CephOSDNearFull", "CephOSDCriticallyFull"]
             prometheus = PrometheusAPI(threading_lock=threading_lock)
             sample = TimeoutSampler(
@@ -192,16 +189,15 @@ class TestCloneDeletion(E2ETest):
             logger.error("Maximum attempts reached. Expected alerts were not detected.")
             raise TimeoutExpiredError
 
-        logger.test_step("Increase Ceph full ratio to recover cluster from full state")
-        logger.info("Changing Ceph full_ratio from 85% to 95%")
+        logger.test_step(
+            "Increase Ceph full ratio from 85% to 95% to recover cluster from full state"
+        )
         change_ceph_full_ratio(95)
         logger.info("Ceph full_ratio changed successfully")
 
         logger.test_step(
-            f"Delete {len(self.clones_list)} clones after cluster recovery"
-        )
-        logger.info(
-            f"Deleting {len(self.clones_list)} clones on {interface_type} PVC of size {self.pvc_size} GB"
+            f"Delete {len(self.clones_list)} clones on {interface_type} PVC "
+            f"of size {self.pvc_size} GB after cluster recovery"
         )
 
         for index, clone in enumerate(self.clones_list):

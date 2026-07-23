@@ -54,8 +54,7 @@ class TestMCGRecovery(E2ETest):
         noobaa_db_backup_and_recovery_locally()
         logger.info("NooBaa database backup and recovery completed")
 
-        logger.test_step("Wait for system stabilization after recovery")
-        logger.info("Waiting 60 seconds for complete stabilization")
+        logger.test_step("Wait 60 seconds for system stabilization after recovery")
         time.sleep(60)
 
         logger.test_step("Validate MCG background features after recovery")
