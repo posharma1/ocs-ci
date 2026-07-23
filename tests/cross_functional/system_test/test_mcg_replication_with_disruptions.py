@@ -76,23 +76,6 @@ class TestMCGReplicationWithDisruptions(E2ETest):
     4) To verify that the Certain admin/disruptive operations do not impact the replication
     """
 
-    @pytest.fixture()
-    def reduce_replication_delay_for_test(self, add_env_vars_to_noobaa_core):
-        """
-        A function-scoped fixture to reduce the replication delay to one minute.
-        Changes will be automatically reverted after the test completes.
-
-        Args:
-            add_env_vars_to_noobaa_core (function): Function-scoped fixture to add env vars to noobaa-core pod
-        """
-        from ocs_ci.ocs import constants as const
-
-        new_delay_in_milliseconds = 60 * 1000
-        new_env_var_tuples = [
-            (const.BUCKET_REPLICATOR_DELAY_PARAM, new_delay_in_milliseconds),
-        ]
-        add_env_vars_to_noobaa_core(new_env_var_tuples)
-
     @pytest.mark.parametrize(
         argnames=["source_bucketclass", "target_bucketclass"],
         argvalues=[
@@ -131,7 +114,6 @@ class TestMCGReplicationWithDisruptions(E2ETest):
         target_bucketclass,
         test_directory_setup,
         nodes,
-        reduce_replication_delay_for_test,
     ):
         logger.test_step("Setup uni-directional bucket replication")
         prefix_site_1 = "site1"
@@ -161,7 +143,7 @@ class TestMCGReplicationWithDisruptions(E2ETest):
         logger.info(f"Written objects: {written_random_objects}")
 
         assert compare_bucket_object_list(
-            mcg_obj_session, source_bucket_name, target_bucket_name, timeout=1200
+            mcg_obj_session, source_bucket_name, target_bucket_name
         )
         logger.info("Uni-directional bucket replication verified successfully")
 
@@ -189,7 +171,7 @@ class TestMCGReplicationWithDisruptions(E2ETest):
         )
         logger.info(f"Written objects: {written_random_objects}")
         assert compare_bucket_object_list(
-            mcg_obj_session, source_bucket_name, target_bucket_name, timeout=1200
+            mcg_obj_session, source_bucket_name, target_bucket_name
         )
         logger.info("Bi-directional bucket replication verified successfully")
 
@@ -220,7 +202,7 @@ class TestMCGReplicationWithDisruptions(E2ETest):
         logger.info(f"Written objects: {written_random_objects}")
 
         assert compare_bucket_object_list(
-            mcg_obj_session, source_bucket_name, target_bucket_name, timeout=1200
+            mcg_obj_session, source_bucket_name, target_bucket_name
         )
         logger.info("All objects successfully recovered to target bucket on new write")
 
@@ -246,7 +228,7 @@ class TestMCGReplicationWithDisruptions(E2ETest):
             pod_names=pod_names, namespace=config.ENV_DATA["cluster_namespace"]
         )
         assert compare_bucket_object_list(
-            mcg_obj_session, source_bucket_name, target_bucket_name, timeout=1200
+            mcg_obj_session, source_bucket_name, target_bucket_name
         )
         logger.info("Object replication verified successfully after RGW pod restart")
 
@@ -276,7 +258,7 @@ class TestMCGReplicationWithDisruptions(E2ETest):
         )
         logger.info("Nodes rebooted successfully!!")
         assert compare_bucket_object_list(
-            mcg_obj_session, source_bucket_name, target_bucket_name, timeout=1200
+            mcg_obj_session, source_bucket_name, target_bucket_name
         )
         logger.info("Object replication verified successfully after cluster reboot")
 

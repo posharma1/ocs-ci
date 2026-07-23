@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.parametrize(
     argnames=["interface_type"],
     argvalues=[
-        # pytest.param(constants.CEPHFILESYSTEM),
+        pytest.param(constants.CEPHFILESYSTEM),
         pytest.param(constants.CEPHBLOCKPOOL),
     ],
 )
