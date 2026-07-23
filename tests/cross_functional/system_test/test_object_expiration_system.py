@@ -415,7 +415,7 @@ class TestObjectExpirationSystemTest:
             )
             logger.info("Ceph health check passed after disruptions")
         except Exception as ex:
-            logger.warning(f"Ceph health check failed: {ex}")  
+            logger.warning(f"Ceph health check failed: {ex}")
 
         # check if the objects are expired
         sample_if_objects_expired()
