@@ -50,7 +50,29 @@ class TestCloneDeletion(E2ETest):
         """
 
         def teardown():
-            # change ceph full ratio to standard value
+            # Delete any clone pods that may have been created mid-test (RBD clones)
+            for clone_pod in self.clone_pods_list:
+                try:
+                    clone_pod.delete()
+                    clone_pod.ocp.wait_for_delete(
+                        resource_name=clone_pod.name, timeout=300
+                    )
+                except Exception:
+                    logger.warning(
+                        f"Failed to delete clone pod {clone_pod.name} during teardown"
+                    )
+
+            # Delete any clones (PVCs) that may have been created mid-test
+            for clone in self.clones_list:
+                try:
+                    clone.delete()
+                    clone.ocp.wait_for_delete(clone.name, timeout=300)
+                except Exception:
+                    logger.warning(
+                        f"Failed to delete clone {clone.name} during teardown"
+                    )
+
+            # Reset ceph full ratio to standard value
             change_ceph_full_ratio(85)
 
         request.addfinalizer(teardown)
@@ -159,7 +181,7 @@ class TestCloneDeletion(E2ETest):
         """
 
         logger.test_step(
-            f"Create {self.num_of_clones} clones of {self.pvc_size} GB "
+            f"Create {self.num_of_clones} clones of {self.pvc_size} GiB "
             f"on {interface_type} PVC to fill cluster"
         )
         self.timeout = 1800
@@ -219,8 +241,8 @@ class TestCloneDeletion(E2ETest):
                 clone_pod.ocp.wait_for_delete(resource_name=clone_pod.name, timeout=300)
             logger.info("All clone pods deleted successfully.")
 
-        logger.info(
-            f"Start deleting {self.num_of_clones} clones on {interface_type} PVC of size {self.pvc_size} Gi."
+        logger.test_step(
+            f"Delete {self.num_of_clones} clones on {interface_type} PVC of size {self.pvc_size} GiB"
         )
 
         for index, clone in enumerate(self.clones_list):
