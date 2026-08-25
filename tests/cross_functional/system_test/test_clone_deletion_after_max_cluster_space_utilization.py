@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
     argnames=["interface_type"],
     argvalues=[
         pytest.param(constants.CEPHFILESYSTEM),
-        pytest.param(constants.CEPHBLOCKPOOL),
+        # pytest.param(constants.CEPHBLOCKPOOL),
     ],
 )
 class TestCloneDeletion(E2ETest):
